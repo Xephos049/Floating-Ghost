@@ -31,7 +31,7 @@ public class JavaFramework {
 	private static int[] spritePos = new int[2];
 
 	// Texture for the sprite.
-	private static int spriteTex1, spriteTex2, spriteTexAlt1, spriteTexAlt2, background, background_alt;
+	private static int spriteTex1, spriteTex2, spriteTexAlt1, spriteTexAlt2, background;
 	private static int para1, para2, para3, para4, para5, para6;
 	private static int[] parallaxTex = new int[6];
 	private static int[] spriteidleR = new int[2];
@@ -42,6 +42,7 @@ public class JavaFramework {
 	static int xwindow, ywindow, xbg, ybg, xmax, ymax;
 	static int time;
 	static int[][] tiles;
+	static int staticPos1, staticPos0;
 
 	// Size of the sprite.
 	private static int[] spriteSize = new int[] { 50, 50 };
@@ -68,14 +69,14 @@ public class JavaFramework {
 		bac.y = -120;
 		xwindow = 640;
 		ywindow = 480;
-		// final int ysprite = 50;
 		tiles = new int[50][50];
 		spr.x = (xwindow / 2) - (bac.w / 2);
 		spr.y = 405;
 
-		spritePos[0] = (xwindow / 2) - (bac.w / 2);
-		// spritePos[1] = (ywindow / 2) - (ysprite / 2);
-		spritePos[1] = 405;
+		staticPos0 = (xwindow / 2) - (bac.w / 2);
+		spritePos[0] = staticPos0;
+		staticPos1 = 405;
+		spritePos[1] = staticPos1;
 
 		try {
 			// Make sure we have a recent version of OpenGL
@@ -115,10 +116,6 @@ public class JavaFramework {
 		gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
 
 		// Load the texture.
-		// spriteTex = glTexImageTGAFile(gl, "Mega-Man-transparent.tga",
-		// spriteSize);
-		// spriteTexAlt = glTexImageTGAFile(gl, "Mega-Man-transparent_alt.tga",
-		// spriteSize);
 		spriteTex1 = glTexImageTGAFile(gl, "ghostr1.tga", new int[] { 1000, 640 });
 		spriteTex2 = glTexImageTGAFile(gl, "ghostr2.tga", new int[] { 1000, 640 });
 		spriteTexAlt1 = glTexImageTGAFile(gl, "ghostl1.tga", new int[] { 1000, 640 });
@@ -129,12 +126,7 @@ public class JavaFramework {
 		para4 = glTexImageTGAFile(gl, "parallax4.tga", new int[] { 1000, 640 });
 		para5 = glTexImageTGAFile(gl, "parallax5.tga", new int[] { 1000, 640 });
 		para6 = glTexImageTGAFile(gl, "parallax6.tga", new int[] { 1000, 640 });
-		// background = glTexImageTGAFile(gl, "endless_background_small.tga",
-		// new int[] { xbg, ybg });
 		background = glTexImageTGAFile(gl, "starry_night.tga", new int[] { bac.w, bac.w });
-		background_alt = glTexImageTGAFile(gl, "starry_night_alt.tga", new int[] { bac.w, bac.w });
-		// walkway = glTexImageTGAFile(gl, "walkway.tga", new int[] { xbg, ybg
-		// });
 
 		spriteidleR[0] = spriteTex1;
 		spriteidleR[1] = spriteTex2;
@@ -177,34 +169,34 @@ public class JavaFramework {
 			}
 
 			if (kbState[KeyEvent.VK_LEFT]) {
-				if (bac.x + cam.x < 0) {
+				if (bac.x + cam.x < 0 && spr.x == staticPos0) {
 					para.x += 3;
 					bac.x += 5;
-				} else {
-
+				} else if (spr.x > 0) {
+					spr.x -= 5;
 				}
 				faceRight = false;
 			}
 
 			if (kbState[KeyEvent.VK_RIGHT]) {
-				if (bac.x + cam.x > -1000) {
+				if (bac.x + cam.x > -1000 && spr.x == staticPos0) {
 					para.x -= 3;
 					bac.x -= 5;
-				} else {
-
+				} else if (spr.x < 590) {
+					spr.x += 5;
 				}
 				faceRight = true;
 			}
 
 			if (kbState[KeyEvent.VK_W]) {
-				if (cam.y + bac.y < 400) {
+				if (cam.y < 400) {
 					para.y++;
 					cam.y++;
 					spr.y++;
 				}
 			}
 			if (kbState[KeyEvent.VK_S]) {
-				if (cam.y + bac.y > 0) {
+				if (cam.y > 0) {
 					para.y--;
 					cam.y--;
 					spr.y--;
@@ -277,19 +269,6 @@ public class JavaFramework {
 						bac.w);
 			}
 		}
-
-		// TODO: update background (it doens't work)
-		// this code just creates a static background of where the origin is
-		// at,
-		// not update to new points
-
-		// for (int i = (bac.x + cam.x); i < (bac.x + cam.x) + xwindow; i +=
-		// bac.w) {
-		// for (int j = (bac.y + cam.y); j < (bac.y + cam.y) + ywindow; j +=
-		// bac.w) {
-		// glDrawSprite(gl, background, i, j, bac.w, bac.w);
-		// }
-		// }
 
 		// Draw Parallax
 
