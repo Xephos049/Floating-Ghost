@@ -169,21 +169,23 @@ public class JavaFramework {
 			}
 
 			if (kbState[KeyEvent.VK_LEFT]) {
-				if (bac.x + cam.x < 0 && spr.x == staticPos0) {
+				if (bac.x + cam.x < 0 && spr.camx == staticPos0) {
 					para.x += 3;
 					bac.x += 5;
-				} else if (spr.x > 0) {
-					spr.x -= 5;
+					spr.x--;
+				} else if (spr.camx > 0) {
+					spr.camx -= 5;
 				}
 				faceRight = false;
 			}
 
 			if (kbState[KeyEvent.VK_RIGHT]) {
-				if (bac.x + cam.x > -1000 && spr.x == staticPos0) {
+				if (bac.x + cam.x > -1000 && spr.camx == staticPos0) {
 					para.x -= 3;
 					bac.x -= 5;
-				} else if (spr.x < 590) {
-					spr.x += 5;
+					spr.x++;
+				} else if (spr.camx < 590) {
+					spr.camx += 5;
 				}
 				faceRight = true;
 			}
@@ -192,28 +194,28 @@ public class JavaFramework {
 				if (cam.y < 400) {
 					para.y++;
 					cam.y++;
-					spr.y++;
+					spr.camy++;
 				}
 			}
 			if (kbState[KeyEvent.VK_S]) {
 				if (cam.y > 0) {
 					para.y--;
 					cam.y--;
-					spr.y--;
+					spr.camy--;
 				}
 			}
 			if (kbState[KeyEvent.VK_A]) {
 				if (cam.x + bac.x < 0) {
 					para.x++;
 					cam.x++;
-					spr.x++;
+					spr.camx++;
 				}
 			}
 			if (kbState[KeyEvent.VK_D]) {
 				if (cam.x + bac.x > -750) {
 					para.x--;
 					cam.x--;
-					spr.x--;
+					spr.camx--;
 				}
 			}
 
@@ -261,10 +263,6 @@ public class JavaFramework {
 		ymin = (int) Math.floor(0 - (cam.y + bac.y) / bac.w);
 		for (int i = xmin; i < xmin + xinc; i++) {
 			for (int j = ymin; j < ymin + yinc; j++) {
-				// if (tiles[i][j] == 1) {
-				// glDrawSprite(gl, background_alt, (i * 40) + bac.x + cam.x, (j
-				// * 40) + cam.y, bac.w, bac.w);
-				// } else
 				glDrawSprite(gl, background, (i * 40) + cam.x + bac.x - 40, (j * 40) + bac.y + cam.y - 40, bac.w,
 						bac.w);
 			}
@@ -277,7 +275,7 @@ public class JavaFramework {
 
 		// Draw player sprite
 
-		if (spr.x > -35 && spr.y > -35 && spr.y < 470 && spr.x < 630) {
+		if (spr.camx > -35 && spr.camy > -35 && spr.camy < 470 && spr.camx < 630) {
 			if (dir == 0) {
 				if (time == 0) {
 					if (changedir == 0) {
@@ -285,7 +283,7 @@ public class JavaFramework {
 					} else
 						changedir = 0;
 				}
-				glDrawSprite(gl, spriteidleR[changedir], spr.x, spr.y, spriteSize[0], spriteSize[1]);
+				glDrawSprite(gl, spriteidleR[changedir], spr.camx, spr.camy, spriteSize[0], spriteSize[1]);
 			} else {
 				if (time == 0) {
 					if (changedir == 0) {
@@ -293,7 +291,7 @@ public class JavaFramework {
 					} else
 						changedir = 0;
 				}
-				glDrawSprite(gl, spriteidleL[changedir], spr.x, spr.y, spriteSize[0], spriteSize[1]);
+				glDrawSprite(gl, spriteidleL[changedir], spr.camx, spr.camy, spriteSize[0], spriteSize[1]);
 			}
 		}
 	}
@@ -404,5 +402,7 @@ class Background {
 
 class Sprite {
 	public int x;
+	public int camx;
 	public int y;
+	public int camy;
 }
