@@ -31,11 +31,12 @@ public class JavaFramework {
 	private static int[] spritePos = new int[2];
 
 	// Texture for the sprite.
-	private static int spriteTex1, spriteTex2, spriteTexAlt1, spriteTexAlt2, background;
-	private static int para1, para2, para3, para4, para5, para6;
+	private static int background, turret;
 	private static int[] parallaxTex = new int[6];
 	private static int[] spriteidleR = new int[2];
 	private static int[] spriteidleL = new int[2];
+	private static int[] fireR = new int[2];
+	private static int[] fireL = new int[2];
 	public static int changedir = 0;
 	static Sprite spr;
 	static int parallexFrame;
@@ -50,6 +51,7 @@ public class JavaFramework {
 	static GL2 gl;
 	static Background para, bac;
 	static Camera cam;
+	static AI ai;
 
 	static// Direction sprite is facing
 	boolean faceRight = true;
@@ -115,31 +117,37 @@ public class JavaFramework {
 		gl.glEnable(GL2.GL_BLEND);
 		gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
 
-		// Load the texture.
-		spriteTex1 = glTexImageTGAFile(gl, "ghostr1.tga", new int[] { 1000, 640 });
-		spriteTex2 = glTexImageTGAFile(gl, "ghostr2.tga", new int[] { 1000, 640 });
-		spriteTexAlt1 = glTexImageTGAFile(gl, "ghostl1.tga", new int[] { 1000, 640 });
-		spriteTexAlt2 = glTexImageTGAFile(gl, "ghostl2.tga", new int[] { 1000, 640 });
-		para1 = glTexImageTGAFile(gl, "parallax1.tga", new int[] { 1000, 640 });
-		para2 = glTexImageTGAFile(gl, "parallax2.tga", new int[] { 1000, 640 });
-		para3 = glTexImageTGAFile(gl, "parallax3.tga", new int[] { 1000, 640 });
-		para4 = glTexImageTGAFile(gl, "parallax4.tga", new int[] { 1000, 640 });
-		para5 = glTexImageTGAFile(gl, "parallax5.tga", new int[] { 1000, 640 });
-		para6 = glTexImageTGAFile(gl, "parallax6.tga", new int[] { 1000, 640 });
-		background = glTexImageTGAFile(gl, "starry_night.tga", new int[] { bac.w, bac.w });
+		// Load the texture
+		turret = glTexImageTGAFile(gl, "turret.tga", new int[] { 59, 55 });
+		spriteidleR[0] = glTexImageTGAFile(gl, "ghostr1.tga", new int[] { 1000,
+				640 });
+		spriteidleR[1] = glTexImageTGAFile(gl, "ghostr2.tga", new int[] { 1000,
+				640 });
 
-		spriteidleR[0] = spriteTex1;
-		spriteidleR[1] = spriteTex2;
+		spriteidleL[0] = glTexImageTGAFile(gl, "ghostl1.tga", new int[] { 1000,
+				640 });
+		spriteidleL[1] = glTexImageTGAFile(gl, "ghostl2.tga", new int[] { 1000,
+				640 });
 
-		spriteidleL[0] = spriteTexAlt1;
-		spriteidleL[1] = spriteTexAlt2;
+		parallaxTex[0] = glTexImageTGAFile(gl, "parallax1.tga", new int[] {
+				1000, 640 });
+		parallaxTex[1] = glTexImageTGAFile(gl, "parallax2.tga", new int[] {
+				1000, 640 });
+		parallaxTex[2] = glTexImageTGAFile(gl, "parallax3.tga", new int[] {
+				1000, 640 });
+		parallaxTex[3] = glTexImageTGAFile(gl, "parallax4.tga", new int[] {
+				1000, 640 });
+		parallaxTex[4] = glTexImageTGAFile(gl, "parallax5.tga", new int[] {
+				1000, 640 });
+		parallaxTex[5] = glTexImageTGAFile(gl, "parallax6.tga", new int[] {
+				1000, 640 });
+		background = glTexImageTGAFile(gl, "starry_night.tga", new int[] {
+				bac.w, bac.w });
 
-		parallaxTex[0] = para1;
-		parallaxTex[1] = para2;
-		parallaxTex[2] = para3;
-		parallaxTex[3] = para4;
-		parallaxTex[4] = para5;
-		parallaxTex[5] = para6;
+		fireR[0] = glTexImageTGAFile(gl, "firer1.tga", new int[] { 30, 10 });
+		fireR[1] = glTexImageTGAFile(gl, "firer2.tga", new int[] { 30, 10 });
+		fireL[0] = glTexImageTGAFile(gl, "firel1.tga", new int[] { 30, 10 });
+		fireL[1] = glTexImageTGAFile(gl, "firel2.tga", new int[] { 30, 10 });
 
 		for (int i = 0; i < tiles.length; i++)
 			for (int j = 0; j < tiles[i].length; j++) {
@@ -263,19 +271,23 @@ public class JavaFramework {
 		ymin = (int) Math.floor(0 - (cam.y + bac.y) / bac.w);
 		for (int i = xmin; i < xmin + xinc; i++) {
 			for (int j = ymin; j < ymin + yinc; j++) {
-				glDrawSprite(gl, background, (i * 40) + cam.x + bac.x - 40, (j * 40) + bac.y + cam.y - 40, bac.w,
-						bac.w);
+				glDrawSprite(gl, background, (i * 40) + cam.x + bac.x - 40,
+						(j * 40) + bac.y + cam.y - 40, bac.w, bac.w);
 			}
 		}
 
 		// Draw Parallax
 
 		if (para.x > -450 && para.x < 450 && para.y > -300 && para.y < 440)
-			glDrawSprite(gl, parallaxTex[parallexFrame], para.x, para.y, 500, 320);
+			glDrawSprite(gl, parallaxTex[parallexFrame], para.x, para.y, 500,
+					320);
+		
+		// TODO draw turret here and automatically fire towards left
 
 		// Draw player sprite
 
-		if (spr.camx > -35 && spr.camy > -35 && spr.camy < 470 && spr.camx < 630) {
+		if (spr.camx > -35 && spr.camy > -35 && spr.camy < 470
+				&& spr.camx < 630) {
 			if (dir == 0) {
 				if (time == 0) {
 					if (changedir == 0) {
@@ -283,7 +295,8 @@ public class JavaFramework {
 					} else
 						changedir = 0;
 				}
-				glDrawSprite(gl, spriteidleR[changedir], spr.camx, spr.camy, spriteSize[0], spriteSize[1]);
+				glDrawSprite(gl, spriteidleR[changedir], spr.camx, spr.camy,
+						spriteSize[0], spriteSize[1]);
 			} else {
 				if (time == 0) {
 					if (changedir == 0) {
@@ -291,7 +304,8 @@ public class JavaFramework {
 					} else
 						changedir = 0;
 				}
-				glDrawSprite(gl, spriteidleL[changedir], spr.camx, spr.camy, spriteSize[0], spriteSize[1]);
+				glDrawSprite(gl, spriteidleL[changedir], spr.camx, spr.camy,
+						spriteSize[0], spriteSize[1]);
 			}
 		}
 	}
@@ -305,7 +319,8 @@ public class JavaFramework {
 			// Open the file.
 			file = new DataInputStream(new FileInputStream(filename));
 		} catch (FileNotFoundException ex) {
-			System.err.format("File: %s -- Could not open for reading.", filename);
+			System.err.format("File: %s -- Could not open for reading.",
+					filename);
 			return 0;
 		}
 
@@ -318,7 +333,8 @@ public class JavaFramework {
 			int imageTypeCode = file.readByte();
 			if (imageTypeCode != 2 && imageTypeCode != 3) {
 				file.close();
-				System.err.format("File: %s -- Unsupported TGA type: %d", filename, imageTypeCode);
+				System.err.format("File: %s -- Unsupported TGA type: %d",
+						filename, imageTypeCode);
 				return 0;
 			}
 
@@ -357,10 +373,13 @@ public class JavaFramework {
 			gl.glGenTextures(1, texArray, 0);
 			int tex = texArray[0];
 			gl.glBindTexture(GL2.GL_TEXTURE_2D, tex);
-			gl.glTexImage2D(GL2.GL_TEXTURE_2D, 0, GL2.GL_RGBA, imageWidth, imageHeight, 0, GL2.GL_BGRA,
-					GL2.GL_UNSIGNED_BYTE, ByteBuffer.wrap(bytes));
-			gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_NEAREST);
-			gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_NEAREST);
+			gl.glTexImage2D(GL2.GL_TEXTURE_2D, 0, GL2.GL_RGBA, imageWidth,
+					imageHeight, 0, GL2.GL_BGRA, GL2.GL_UNSIGNED_BYTE,
+					ByteBuffer.wrap(bytes));
+			gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER,
+					GL2.GL_NEAREST);
+			gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER,
+					GL2.GL_NEAREST);
 
 			out_size[0] = imageWidth;
 			out_size[1] = imageHeight;
@@ -404,5 +423,12 @@ class Sprite {
 	public int x;
 	public int camx;
 	public int y;
+	public int camy;
+}
+
+class AI {
+	public int x;
+	public int y;
+	public int camx;
 	public int camy;
 }
