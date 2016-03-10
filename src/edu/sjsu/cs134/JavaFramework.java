@@ -32,12 +32,15 @@ public class JavaFramework {
 	private static int[] spritePos = new int[2];
 
 	// Texture for the sprite.
+<<<<<<< HEAD
 	private static int background;
+=======
+	private static int spriteTex1, spriteTex2, spriteTexAlt1, spriteTexAlt2, background;
+	private static int para1, para2, para3, para4, para5, para6;
+>>>>>>> parent of 0190e84... added sprites and classes
 	private static int[] parallaxTex = new int[6];
 	private static int[] spriteidleR = new int[2];
 	private static int[] spriteidleL = new int[2];
-	private static int[] fireR = new int[2];
-	private static int[] fireL = new int[2];
 	public static int changedir = 0;
 	static Sprite spr;
 	static int parallexFrame;
@@ -53,8 +56,11 @@ public class JavaFramework {
 	static GL2 gl;
 	static Background para, bac;
 	static Camera cam;
+<<<<<<< HEAD
 	static AI ai;
 	static Projectile fire;
+=======
+>>>>>>> parent of 0190e84... added sprites and classes
 
 	static// Direction sprite is facing
 	boolean moveright = false, faceRight = true;
@@ -125,6 +131,7 @@ public class JavaFramework {
 		gl.glEnable(GL2.GL_BLEND);
 		gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
 
+<<<<<<< HEAD
 		// Load the texture
 
 		ai = new AI();
@@ -155,6 +162,33 @@ public class JavaFramework {
 		fireR[1] = glTexImageTGAFile(gl, "firer2.tga", new int[] { 30, 10 });
 		fireL[0] = glTexImageTGAFile(gl, "firel1.tga", new int[] { 30, 10 });
 		fireL[1] = glTexImageTGAFile(gl, "firel2.tga", new int[] { 30, 10 });
+=======
+		// Load the texture.
+		spriteTex1 = glTexImageTGAFile(gl, "ghostr1.tga", new int[] { 1000, 640 });
+		spriteTex2 = glTexImageTGAFile(gl, "ghostr2.tga", new int[] { 1000, 640 });
+		spriteTexAlt1 = glTexImageTGAFile(gl, "ghostl1.tga", new int[] { 1000, 640 });
+		spriteTexAlt2 = glTexImageTGAFile(gl, "ghostl2.tga", new int[] { 1000, 640 });
+		para1 = glTexImageTGAFile(gl, "parallax1.tga", new int[] { 1000, 640 });
+		para2 = glTexImageTGAFile(gl, "parallax2.tga", new int[] { 1000, 640 });
+		para3 = glTexImageTGAFile(gl, "parallax3.tga", new int[] { 1000, 640 });
+		para4 = glTexImageTGAFile(gl, "parallax4.tga", new int[] { 1000, 640 });
+		para5 = glTexImageTGAFile(gl, "parallax5.tga", new int[] { 1000, 640 });
+		para6 = glTexImageTGAFile(gl, "parallax6.tga", new int[] { 1000, 640 });
+		background = glTexImageTGAFile(gl, "starry_night.tga", new int[] { bac.w, bac.w });
+
+		spriteidleR[0] = spriteTex1;
+		spriteidleR[1] = spriteTex2;
+
+		spriteidleL[0] = spriteTexAlt1;
+		spriteidleL[1] = spriteTexAlt2;
+
+		parallaxTex[0] = para1;
+		parallaxTex[1] = para2;
+		parallaxTex[2] = para3;
+		parallaxTex[3] = para4;
+		parallaxTex[4] = para5;
+		parallaxTex[5] = para6;
+>>>>>>> parent of 0190e84... added sprites and classes
 
 		for (int i = 0; i < tiles.length; i++)
 			for (int j = 0; j < tiles[i].length; j++) {
@@ -319,8 +353,11 @@ public class JavaFramework {
 
 		if (para.x > -450 && para.x < 450 && para.y > -300 && para.y < 440)
 			glDrawSprite(gl, parallaxTex[parallexFrame], para.x, para.y, 500, 320);
+<<<<<<< HEAD
 
 		// TODO draw turret here and automatically fire towards left
+=======
+>>>>>>> parent of 0190e84... added sprites and classes
 
 		if (time % 3 == 0) {
 			if (!moveright) {
@@ -471,6 +508,7 @@ class Sprite {
 	public int y;
 	public int camy;
 }
+<<<<<<< HEAD
 
 class AI {
 	public int spr;
@@ -527,3 +565,5 @@ class Projectile {
 		gl.glEnd();
 	}
 }
+=======
+>>>>>>> parent of 0190e84... added sprites and classes
