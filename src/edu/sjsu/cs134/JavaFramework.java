@@ -124,6 +124,8 @@ public class JavaFramework {
 		gl.glEnable(GL2.GL_TEXTURE_2D);
 		gl.glEnable(GL2.GL_BLEND);
 		gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
+		
+		// TODO: Start here with debugging
 
 		// Load the texture
 
