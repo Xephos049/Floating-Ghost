@@ -33,7 +33,6 @@ public class JavaFramework {
 
 	// Texture for the sprite.
 	private static int background;
-	private static int[] parallaxTex = new int[6];
 	private static int[] spriteidleR = new int[2];
 	private static int[] spriteidleL = new int[2];
 	private static int[] fireR = new int[2];
@@ -42,7 +41,7 @@ public class JavaFramework {
 	static Sprite spr;
 	static int parallexFrame;
 	static int xwindow, ywindow, xbg, ybg, xmax, ymax;
-	static int time;
+	static int time, increase = 0;
 	static int[][] tiles;
 	static int staticPos1, staticPos0;
 	static ArrayList<AI> ais;
@@ -57,11 +56,13 @@ public class JavaFramework {
 	static Projectile fire;
 
 	static// Direction sprite is facing
-	boolean moveright = false, faceRight = true;
+	boolean moveright = true, faceRight = true;
 
 	public static void main(String[] args) {
 		ais = new ArrayList<AI>();
+		fire = new Projectile();
 		GLProfile gl2Profile;
+		fire.active = false;
 		xmax = 1280;
 		cam = new Camera();
 		bac = new Background();
@@ -69,8 +70,9 @@ public class JavaFramework {
 		spr = new Sprite();
 		ai = new AI();
 		ai.x = 0;
+		ai.tempx = 0;
+		ai.camx = 0;
 		time = 50;
-		parallexFrame = 0;
 		cam.x = 0;
 		cam.y = 0;
 		bac.w = 40;
@@ -79,7 +81,10 @@ public class JavaFramework {
 		ywindow = 480;
 		tiles = new int[50][50];
 		spr.x = (xwindow / 2) - (bac.w / 2);
-		spr.y = 405;
+		spr.y = 420;
+		fire.camx = spr.camx + 22;
+		fire.camy = spr.y + 20;
+		fire.x = 0;
 		spr.camy = spr.y;
 		spr.camx = spr.x;
 
@@ -124,8 +129,6 @@ public class JavaFramework {
 		gl.glEnable(GL2.GL_TEXTURE_2D);
 		gl.glEnable(GL2.GL_BLEND);
 		gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
-		
-		// TODO: Start here with debugging
 
 		// Load the texture
 
@@ -135,23 +138,21 @@ public class JavaFramework {
 		ais.add(ai);
 		ais.get(0).x = 600;
 		ais.get(0).y = 550;
-		ais.get(0).w = 59;
-		ais.get(0).h = 55;
+		ais.get(0).w = 50;
+		ais.get(0).h = 50;
 		ais.get(0).active = true;
 
-		spriteidleR[0] = glTexImageTGAFile(gl, "ghostr1.tga", new int[] { 1000, 640 });
-		spriteidleR[1] = glTexImageTGAFile(gl, "ghostr2.tga", new int[] { 1000, 640 });
+		spriteidleR[0] = glTexImageTGAFile(gl, "ghostr1.tga", new int[] { 1000,
+				640 });
+		spriteidleR[1] = glTexImageTGAFile(gl, "ghostr2.tga", new int[] { 1000,
+				640 });
 
-		spriteidleL[0] = glTexImageTGAFile(gl, "ghostl1.tga", new int[] { 1000, 640 });
-		spriteidleL[1] = glTexImageTGAFile(gl, "ghostl2.tga", new int[] { 1000, 640 });
-
-		parallaxTex[0] = glTexImageTGAFile(gl, "parallax1.tga", new int[] { 1000, 640 });
-		parallaxTex[1] = glTexImageTGAFile(gl, "parallax2.tga", new int[] { 1000, 640 });
-		parallaxTex[2] = glTexImageTGAFile(gl, "parallax3.tga", new int[] { 1000, 640 });
-		parallaxTex[3] = glTexImageTGAFile(gl, "parallax4.tga", new int[] { 1000, 640 });
-		parallaxTex[4] = glTexImageTGAFile(gl, "parallax5.tga", new int[] { 1000, 640 });
-		parallaxTex[5] = glTexImageTGAFile(gl, "parallax6.tga", new int[] { 1000, 640 });
-		background = glTexImageTGAFile(gl, "starry_night.tga", new int[] { bac.w, bac.w });
+		spriteidleL[0] = glTexImageTGAFile(gl, "ghostl1.tga", new int[] { 1000,
+				640 });
+		spriteidleL[1] = glTexImageTGAFile(gl, "ghostl2.tga", new int[] { 1000,
+				640 });
+		background = glTexImageTGAFile(gl, "starry_night.tga", new int[] {
+				bac.w, bac.w });
 
 		fireR[0] = glTexImageTGAFile(gl, "firer1.tga", new int[] { 30, 10 });
 		fireR[1] = glTexImageTGAFile(gl, "firer2.tga", new int[] { 30, 10 });
@@ -190,6 +191,8 @@ public class JavaFramework {
 					para.x += 3;
 					bac.x += 5;
 					spr.x--;
+					if (fire.active)
+						fire.camx += 5;
 				} else if (spr.camx > 0) {
 					spr.camx -= 5;
 				}
@@ -201,6 +204,8 @@ public class JavaFramework {
 					para.x -= 3;
 					bac.x -= 5;
 					spr.x++;
+					if (fire.active)
+						fire.camx -= 5;
 				} else if (spr.camx < 590) {
 					spr.camx += 5;
 				}
@@ -212,6 +217,9 @@ public class JavaFramework {
 					para.y++;
 					cam.y++;
 					spr.camy++;
+					ais.get(0).camy++;
+					if (fire.active)
+						fire.camy++;
 				}
 			}
 			if (kbState[KeyEvent.VK_S]) {
@@ -219,6 +227,9 @@ public class JavaFramework {
 					para.y--;
 					cam.y--;
 					spr.camy--;
+					ais.get(0).camy--;
+					if (fire.active)
+						fire.camy--;
 				}
 			}
 			if (kbState[KeyEvent.VK_A]) {
@@ -226,6 +237,9 @@ public class JavaFramework {
 					para.x++;
 					cam.x++;
 					spr.camx++;
+					ais.get(0).camx++;
+					if (fire.active)
+						fire.camx++;
 				}
 			}
 			if (kbState[KeyEvent.VK_D]) {
@@ -233,31 +247,23 @@ public class JavaFramework {
 					para.x--;
 					cam.x--;
 					spr.camx--;
+					ais.get(0).camx--;
+					if (fire.active)
+						fire.camx--;
 				}
 			}
 
 			if (kbState[KeyEvent.VK_SPACE]) {
-				fire = new Projectile();
-				drawProjectile(spr.x + 50, spr.y + 10, faceRight, time, ais);
+				// drawProjectile(spr.x + 50, spr.y + 10, faceRight, time, ais);
+				if (!fire.active) {
+					fire.camx = spr.camx + 20;
+					// fire.x = spr.camx + 20;
+					fire.active = true;
+				}
 			}
 
 			gl.glClearColor(0, 0, 0, 1);
 			gl.glClear(GL2.GL_COLOR_BUFFER_BIT);
-
-			// Parallax Animation update
-
-			if (time == 42)
-				parallexFrame = 0;
-			else if (time == 34)
-				parallexFrame = 1;
-			else if (time == 26)
-				parallexFrame = 2;
-			else if (time == 18)
-				parallexFrame = 3;
-			else if (time == 10)
-				parallexFrame = 4;
-			else if (time == 0)
-				parallexFrame = 5;
 
 			/* Draw sprite */
 
@@ -278,33 +284,6 @@ public class JavaFramework {
 		System.exit(0);
 	}
 
-	public static void drawProjectile(int x, int y, boolean faceRight, int time, ArrayList<AI> ais) {
-		int temptime = time;
-		int increase = 0;
-		boolean active = true;
-		int tick = 0;
-		int xpos;
-		while (active) {
-			temptime = (temptime % 50) + 1;
-			if (temptime == 0)
-				tick = (tick % 2) + 1;
-			if (faceRight) {
-				xpos = x + (increase / 3);
-				if (x + (1 / 3) > 480)
-					active = false;
-				else
-					glDrawSprite(gl, fireR[tick], xpos + bac.x, y, 30, 10);
-			} else {
-				xpos = -(x + (increase / 3));
-				if (x + (1 / 3) > 0)
-					active = false;
-				else
-					glDrawSprite(gl, fireL[tick], xpos + bac.x, y, 30, 10);
-			}
-			increase++;
-		}
-	}
-
 	public static void updateSpr(int time, int dir) {
 		// Draw background
 		int xmin, ymin, xinc = 18, yinc = 14;
@@ -312,37 +291,40 @@ public class JavaFramework {
 		ymin = (int) Math.floor(0 - (cam.y + bac.y) / bac.w);
 		for (int i = xmin; i < xmin + xinc; i++) {
 			for (int j = ymin; j < ymin + yinc; j++) {
-				glDrawSprite(gl, background, (i * 40) + cam.x + bac.x - 40, (j * 40) + bac.y + cam.y - 40, bac.w,
-						bac.w);
+				glDrawSprite(gl, background, (i * 40) + cam.x + bac.x - 40,
+						(j * 40) + bac.y + cam.y - 40, bac.w, bac.w);
 			}
 		}
 
-		// Draw Parallax
+		// draw turret here and automatically fire towards left
 
-		if (para.x > -450 && para.x < 450 && para.y > -300 && para.y < 440)
-			glDrawSprite(gl, parallaxTex[parallexFrame], para.x, para.y, 500, 320);
-
-		// TODO draw turret here and automatically fire towards left
-
-		if (time % 3 == 0) {
-			if (!moveright) {
-				if (ai.x < 100) {
-					ai.x++;
-				} else
-					moveright = true;
-			} else {
-				if (ai.x > 0) {
-					ai.x--;
+		ais.get(0).x = ai.camx + bac.x + 600;
+		if (time % 2 == 0) {
+			if (moveright) {
+				if (ai.tempx <= 100) {
+					ais.get(0).x++;
+					ai.tempx++;
+					ai.camx++;
 				} else
 					moveright = false;
+			} else {
+				if (ai.tempx >= 0) {
+					ais.get(0).x--;
+					ai.tempx--;
+					ai.camx--;
+				} else
+					moveright = true;
 			}
 		}
-		while (ais.get(0).active)
-			glDrawSprite(gl, ais.get(0).spr, ai.camx + ai.x + bac.x + 600, ai.camy + bac.y + 550, 50, 50);
+		if (ais.get(0).active) {
+			glDrawSprite(gl, ais.get(0).spr, ais.get(0).x, ai.camy + bac.y
+					+ 550, 50, 50);
+		}
 
 		// Draw player sprite
 
-		if (spr.camx > -35 && spr.camy > -35 && spr.camy < 470 && spr.camx < 630) {
+		if (spr.camx > -35 && spr.camy > -35 && spr.camy < 470
+				&& spr.camx < 630) {
 			if (dir == 0) {
 				if (time == 0) {
 					if (changedir == 0) {
@@ -350,7 +332,8 @@ public class JavaFramework {
 					} else
 						changedir = 0;
 				}
-				glDrawSprite(gl, spriteidleR[changedir], spr.camx, spr.camy, spriteSize[0], spriteSize[1]);
+				glDrawSprite(gl, spriteidleR[changedir], spr.camx, spr.camy,
+						spriteSize[0], spriteSize[1]);
 			} else {
 				if (time == 0) {
 					if (changedir == 0) {
@@ -358,7 +341,39 @@ public class JavaFramework {
 					} else
 						changedir = 0;
 				}
-				glDrawSprite(gl, spriteidleL[changedir], spr.camx, spr.camy, spriteSize[0], spriteSize[1]);
+				glDrawSprite(gl, spriteidleL[changedir], spr.camx, spr.camy,
+						spriteSize[0], spriteSize[1]);
+			}
+		}
+
+		// Draw projectile
+
+		// TODO fix bugs
+
+		if (!fire.active)
+			fire.right = faceRight;
+		if (fire.active) {
+
+			if (fire.right) {
+				fire.x += 2;
+				glDrawSprite(gl, fireR[0], fire.camx + fire.x, fire.y
+						+ fire.camy, 30, 10);
+			} else {
+				fire.x -= 2;
+				glDrawSprite(gl, fireL[0], fire.camx + fire.x - 50, fire.y
+						+ fire.camy, 30, 10);
+			}
+			increase++;
+			if ((fire.camx + fire.x < -60 || fire.camx + fire.x > 630)) {
+				fire.active = false;
+				increase = 0;
+				fire.x = 0;
+			} else if ((fire.x + fire.camx + 30 >= ais.get(0).x && fire.right)
+					|| (fire.x + fire.camx - 50 <= ais.get(0).x + ais.get(0).w)
+					&& !fire.right) {
+				fire.active = false;
+				fire.x = 0;
+				increase = 0;
 			}
 		}
 	}
@@ -372,7 +387,8 @@ public class JavaFramework {
 			// Open the file.
 			file = new DataInputStream(new FileInputStream(filename));
 		} catch (FileNotFoundException ex) {
-			System.err.format("File: %s -- Could not open for reading.", filename);
+			System.err.format("File: %s -- Could not open for reading.",
+					filename);
 			return 0;
 		}
 
@@ -385,7 +401,8 @@ public class JavaFramework {
 			int imageTypeCode = file.readByte();
 			if (imageTypeCode != 2 && imageTypeCode != 3) {
 				file.close();
-				System.err.format("File: %s -- Unsupported TGA type: %d", filename, imageTypeCode);
+				System.err.format("File: %s -- Unsupported TGA type: %d",
+						filename, imageTypeCode);
 				return 0;
 			}
 
@@ -424,10 +441,13 @@ public class JavaFramework {
 			gl.glGenTextures(1, texArray, 0);
 			int tex = texArray[0];
 			gl.glBindTexture(GL2.GL_TEXTURE_2D, tex);
-			gl.glTexImage2D(GL2.GL_TEXTURE_2D, 0, GL2.GL_RGBA, imageWidth, imageHeight, 0, GL2.GL_BGRA,
-					GL2.GL_UNSIGNED_BYTE, ByteBuffer.wrap(bytes));
-			gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_NEAREST);
-			gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_NEAREST);
+			gl.glTexImage2D(GL2.GL_TEXTURE_2D, 0, GL2.GL_RGBA, imageWidth,
+					imageHeight, 0, GL2.GL_BGRA, GL2.GL_UNSIGNED_BYTE,
+					ByteBuffer.wrap(bytes));
+			gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER,
+					GL2.GL_NEAREST);
+			gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER,
+					GL2.GL_NEAREST);
 
 			out_size[0] = imageWidth;
 			out_size[1] = imageHeight;
@@ -483,6 +503,7 @@ class AI {
 	public int w;
 	public int h;
 	public boolean active;
+	public int tempx;
 }
 
 class Projectile {
@@ -490,42 +511,6 @@ class Projectile {
 	public int y;
 	public int camx;
 	public int camy;
-	public boolean active = true;
-	int time;
-	int tick = 0;
-
-	// void draw(GL2 gl, int[] fire, int x, int y, boolean faceRight, int time)
-	// {
-	// this.time = time;
-	// while (active) {
-	// this.time = (this.time % 50) + 1;
-	// if (this.time == 0)
-	// tick = (tick % 2) +1;
-	// if (faceRight)
-	// for (int i = 0; i > 0; i++) {
-	// if (x + (1 / 3) > 480)
-	// active = false;
-	// else
-	// glDrawSprite(gl, fire[tick], x + (i / 3), y, 30, 10);
-	// }
-	// else
-	// }
-	// }
-
-	public static void glDrawSprite(GL2 gl, int tex, int x, int y, int w, int h) {
-		gl.glBindTexture(GL2.GL_TEXTURE_2D, tex);
-		gl.glBegin(GL2.GL_QUADS);
-		{
-			gl.glColor3ub((byte) -1, (byte) -1, (byte) -1);
-			gl.glTexCoord2f(0, 1);
-			gl.glVertex2i(x, y);
-			gl.glTexCoord2f(1, 1);
-			gl.glVertex2i(x + w, y);
-			gl.glTexCoord2f(1, 0);
-			gl.glVertex2i(x + w, y + h);
-			gl.glTexCoord2f(0, 0);
-			gl.glVertex2i(x, y + h);
-		}
-		gl.glEnd();
-	}
+	public boolean active;
+	public boolean right;
 }
