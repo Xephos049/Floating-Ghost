@@ -32,7 +32,7 @@ public class JavaFramework {
 	private static int[] spritePos = new int[2];
 
 	// Texture for the sprite.
-	private static int background;
+	private static int background, wall;
 	private static int[] spriteidleR = new int[2];
 	private static int[] spriteidleL = new int[2];
 	private static int[] fireR = new int[2];
@@ -142,17 +142,13 @@ public class JavaFramework {
 		ais.get(0).h = 50;
 		ais.get(0).active = true;
 
-		spriteidleR[0] = glTexImageTGAFile(gl, "ghostr1.tga", new int[] { 1000,
-				640 });
-		spriteidleR[1] = glTexImageTGAFile(gl, "ghostr2.tga", new int[] { 1000,
-				640 });
+		spriteidleR[0] = glTexImageTGAFile(gl, "ghostr1.tga", new int[] { 1000, 640 });
+		spriteidleR[1] = glTexImageTGAFile(gl, "ghostr2.tga", new int[] { 1000, 640 });
 
-		spriteidleL[0] = glTexImageTGAFile(gl, "ghostl1.tga", new int[] { 1000,
-				640 });
-		spriteidleL[1] = glTexImageTGAFile(gl, "ghostl2.tga", new int[] { 1000,
-				640 });
-		background = glTexImageTGAFile(gl, "starry_night.tga", new int[] {
-				bac.w, bac.w });
+		spriteidleL[0] = glTexImageTGAFile(gl, "ghostl1.tga", new int[] { 1000, 640 });
+		spriteidleL[1] = glTexImageTGAFile(gl, "ghostl2.tga", new int[] { 1000, 640 });
+		background = glTexImageTGAFile(gl, "starry_night.tga", new int[] { bac.w, bac.w });
+		wall = glTexImageTGAFile(gl, "wall.tga", new int[] { bac.w, bac.w });
 
 		fireR[0] = glTexImageTGAFile(gl, "firer1.tga", new int[] { 30, 10 });
 		fireR[1] = glTexImageTGAFile(gl, "firer2.tga", new int[] { 30, 10 });
@@ -161,7 +157,7 @@ public class JavaFramework {
 
 		for (int i = 0; i < tiles.length; i++)
 			for (int j = 0; j < tiles[i].length; j++) {
-				if (i == j)
+				if (i == 1 || i == 41)
 					tiles[i][j] = 1;
 				else
 					tiles[i][j] = 0;
@@ -200,7 +196,7 @@ public class JavaFramework {
 			}
 
 			if (kbState[KeyEvent.VK_RIGHT]) {
-				if (bac.x + cam.x > -1000 && spr.camx == staticPos0) {
+				if ((bac.x + cam.x > -1000 && spr.camx == staticPos0) ) {
 					para.x -= 3;
 					bac.x -= 5;
 					spr.x++;
@@ -291,8 +287,11 @@ public class JavaFramework {
 		ymin = (int) Math.floor(0 - (cam.y + bac.y) / bac.w);
 		for (int i = xmin; i < xmin + xinc; i++) {
 			for (int j = ymin; j < ymin + yinc; j++) {
-				glDrawSprite(gl, background, (i * 40) + cam.x + bac.x - 40,
-						(j * 40) + bac.y + cam.y - 40, bac.w, bac.w);
+				if (tiles[i][j] == 0)
+					glDrawSprite(gl, background, (i * 40) + cam.x + bac.x - 40, (j * 40) + bac.y + cam.y - 40, bac.w,
+							bac.w);
+				else
+					glDrawSprite(gl, wall, (i * 40) + cam.x + bac.x - 40, (j * 40) + bac.y + cam.y - 40, bac.w, bac.w);
 			}
 		}
 
@@ -317,14 +316,12 @@ public class JavaFramework {
 			}
 		}
 		if (ais.get(0).active) {
-			glDrawSprite(gl, ais.get(0).spr, ais.get(0).x, ai.camy + bac.y
-					+ 550, 50, 50);
+			glDrawSprite(gl, ais.get(0).spr, ais.get(0).x, ai.camy + bac.y + 550, 50, 50);
 		}
 
 		// Draw player sprite
 
-		if (spr.camx > -35 && spr.camy > -35 && spr.camy < 470
-				&& spr.camx < 630) {
+		if (spr.camx > -35 && spr.camy > -35 && spr.camy < 470 && spr.camx < 630) {
 			if (dir == 0) {
 				if (time == 0) {
 					if (changedir == 0) {
@@ -332,8 +329,7 @@ public class JavaFramework {
 					} else
 						changedir = 0;
 				}
-				glDrawSprite(gl, spriteidleR[changedir], spr.camx, spr.camy,
-						spriteSize[0], spriteSize[1]);
+				glDrawSprite(gl, spriteidleR[changedir], spr.camx, spr.camy, spriteSize[0], spriteSize[1]);
 			} else {
 				if (time == 0) {
 					if (changedir == 0) {
@@ -341,8 +337,7 @@ public class JavaFramework {
 					} else
 						changedir = 0;
 				}
-				glDrawSprite(gl, spriteidleL[changedir], spr.camx, spr.camy,
-						spriteSize[0], spriteSize[1]);
+				glDrawSprite(gl, spriteidleL[changedir], spr.camx, spr.camy, spriteSize[0], spriteSize[1]);
 			}
 		}
 
@@ -356,12 +351,10 @@ public class JavaFramework {
 
 			if (fire.right) {
 				fire.x += 2;
-				glDrawSprite(gl, fireR[0], fire.camx + fire.x, fire.y
-						+ fire.camy, 30, 10);
+				glDrawSprite(gl, fireR[0], fire.camx + fire.x, fire.y + fire.camy, 30, 10);
 			} else {
 				fire.x -= 2;
-				glDrawSprite(gl, fireL[0], fire.camx + fire.x - 50, fire.y
-						+ fire.camy, 30, 10);
+				glDrawSprite(gl, fireL[0], fire.camx + fire.x - 50, fire.y + fire.camy, 30, 10);
 			}
 			increase++;
 			if ((fire.camx + fire.x < -60 || fire.camx + fire.x > 630)) {
@@ -369,8 +362,7 @@ public class JavaFramework {
 				increase = 0;
 				fire.x = 0;
 			} else if ((fire.x + fire.camx + 30 >= ais.get(0).x && fire.right)
-					|| (fire.x + fire.camx - 50 <= ais.get(0).x + ais.get(0).w)
-					&& !fire.right) {
+					|| (fire.x + fire.camx - 50 <= ais.get(0).x + ais.get(0).w) && !fire.right) {
 				fire.active = false;
 				fire.x = 0;
 				increase = 0;
@@ -387,8 +379,7 @@ public class JavaFramework {
 			// Open the file.
 			file = new DataInputStream(new FileInputStream(filename));
 		} catch (FileNotFoundException ex) {
-			System.err.format("File: %s -- Could not open for reading.",
-					filename);
+			System.err.format("File: %s -- Could not open for reading.", filename);
 			return 0;
 		}
 
@@ -401,8 +392,7 @@ public class JavaFramework {
 			int imageTypeCode = file.readByte();
 			if (imageTypeCode != 2 && imageTypeCode != 3) {
 				file.close();
-				System.err.format("File: %s -- Unsupported TGA type: %d",
-						filename, imageTypeCode);
+				System.err.format("File: %s -- Unsupported TGA type: %d", filename, imageTypeCode);
 				return 0;
 			}
 
@@ -441,13 +431,10 @@ public class JavaFramework {
 			gl.glGenTextures(1, texArray, 0);
 			int tex = texArray[0];
 			gl.glBindTexture(GL2.GL_TEXTURE_2D, tex);
-			gl.glTexImage2D(GL2.GL_TEXTURE_2D, 0, GL2.GL_RGBA, imageWidth,
-					imageHeight, 0, GL2.GL_BGRA, GL2.GL_UNSIGNED_BYTE,
-					ByteBuffer.wrap(bytes));
-			gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER,
-					GL2.GL_NEAREST);
-			gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER,
-					GL2.GL_NEAREST);
+			gl.glTexImage2D(GL2.GL_TEXTURE_2D, 0, GL2.GL_RGBA, imageWidth, imageHeight, 0, GL2.GL_BGRA,
+					GL2.GL_UNSIGNED_BYTE, ByteBuffer.wrap(bytes));
+			gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_NEAREST);
+			gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_NEAREST);
 
 			out_size[0] = imageWidth;
 			out_size[1] = imageHeight;
