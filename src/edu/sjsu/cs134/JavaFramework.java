@@ -183,28 +183,39 @@ public class JavaFramework {
 			}
 
 			if (kbState[KeyEvent.VK_LEFT]) {
-				if (bac.x + cam.x < 0 && spr.camx == staticPos0) {
-					para.x += 3;
-					bac.x += 5;
-					spr.x--;
-					if (fire.active)
-						fire.camx += 5;
-				} else if (spr.camx > 0) {
-					spr.camx -= 5;
-				}
+				// for (int i = 0; i < tiles.length; i++)
+				// Acting as if we are running a loop for existing walls
+				int i = 1;
+				if (!((double) ((spr.x - 1) / 40) <= i - 1) && tiles[i][0] == 1)
+					// System.out.println(spr.x);
+					if (bac.x + cam.x < 0 && spr.camx == staticPos0) {
+						para.x += 3;
+						bac.x += 5;
+						spr.x -= 5;
+						if (fire.active)
+							fire.camx += 5;
+					} else if (spr.camx > 0) {
+						spr.camx -= 5;
+						spr.x -= 5;
+					}
 				faceRight = false;
 			}
 
 			if (kbState[KeyEvent.VK_RIGHT]) {
-				if ((bac.x + cam.x > -1000 && spr.camx == staticPos0) ) {
-					para.x -= 3;
-					bac.x -= 5;
-					spr.x++;
-					if (fire.active)
-						fire.camx -= 5;
-				} else if (spr.camx < 590) {
-					spr.camx += 5;
-				}
+				// for (int i = 0; i < tiles.length; i++)
+				// Acting as if we are running a loop for existing walls
+				int i = 41;
+				if (!((double) ((spr.x) / 40) >= i - 2 && tiles[i][0] == 1))
+					if ((bac.x + cam.x > -1000 && spr.camx == staticPos0)) {
+						para.x -= 3;
+						bac.x -= 5;
+						spr.x += 5;
+						if (fire.active)
+							fire.camx -= 5;
+					} else if (spr.camx < 590) {
+						spr.camx += 5;
+						spr.x += 5;
+					}
 				faceRight = true;
 			}
 
@@ -218,6 +229,7 @@ public class JavaFramework {
 						fire.camy++;
 				}
 			}
+
 			if (kbState[KeyEvent.VK_S]) {
 				if (cam.y > 0) {
 					para.y--;
