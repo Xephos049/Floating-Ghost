@@ -16,6 +16,7 @@ import com.jogamp.nativewindow.*;
 
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 
 public class JavaFramework {
 	// Set this to true to force the game to exit.
@@ -31,18 +32,19 @@ public class JavaFramework {
 	private static int[] spritePos = new int[2];
 
 	// Texture for the sprite.
-	private static int spriteTex1, spriteTex2, spriteTexAlt1, spriteTexAlt2, background;
-	private static int para1, para2, para3, para4, para5, para6;
-	private static int[] parallaxTex = new int[6];
+	private static int background, wall;
 	private static int[] spriteidleR = new int[2];
 	private static int[] spriteidleL = new int[2];
+	private static int[] fireR = new int[2];
+	private static int[] fireL = new int[2];
 	public static int changedir = 0;
 	static Sprite spr;
 	static int parallexFrame;
 	static int xwindow, ywindow, xbg, ybg, xmax, ymax;
-	static int time;
+	static int time, increase = 0;
 	static int[][] tiles;
 	static int staticPos1, staticPos0;
+	static ArrayList<AI> ais;
 
 	// Size of the sprite.
 	private static int[] spriteSize = new int[] { 50, 50 };
@@ -50,19 +52,27 @@ public class JavaFramework {
 	static GL2 gl;
 	static Background para, bac;
 	static Camera cam;
+	static AI ai;
+	static Projectile fire;
 
 	static// Direction sprite is facing
-	boolean faceRight = true;
+	boolean moveright = true, faceRight = true;
 
 	public static void main(String[] args) {
+		ais = new ArrayList<AI>();
+		fire = new Projectile();
 		GLProfile gl2Profile;
+		fire.active = false;
 		xmax = 1280;
 		cam = new Camera();
 		bac = new Background();
 		para = new Background();
 		spr = new Sprite();
+		ai = new AI();
+		ai.x = 0;
+		ai.tempx = 0;
+		ai.camx = 0;
 		time = 50;
-		parallexFrame = 0;
 		cam.x = 0;
 		cam.y = 0;
 		bac.w = 40;
@@ -71,7 +81,12 @@ public class JavaFramework {
 		ywindow = 480;
 		tiles = new int[50][50];
 		spr.x = (xwindow / 2) - (bac.w / 2);
-		spr.y = 405;
+		spr.y = 420;
+		fire.camx = spr.camx + 22;
+		fire.camy = spr.y + 20;
+		fire.x = 0;
+		spr.camy = spr.y;
+		spr.camx = spr.x;
 
 		staticPos0 = (xwindow / 2) - (bac.w / 2);
 		spritePos[0] = staticPos0;
@@ -115,35 +130,34 @@ public class JavaFramework {
 		gl.glEnable(GL2.GL_BLEND);
 		gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
 
-		// Load the texture.
-		spriteTex1 = glTexImageTGAFile(gl, "ghostr1.tga", new int[] { 1000, 640 });
-		spriteTex2 = glTexImageTGAFile(gl, "ghostr2.tga", new int[] { 1000, 640 });
-		spriteTexAlt1 = glTexImageTGAFile(gl, "ghostl1.tga", new int[] { 1000, 640 });
-		spriteTexAlt2 = glTexImageTGAFile(gl, "ghostl2.tga", new int[] { 1000, 640 });
-		para1 = glTexImageTGAFile(gl, "parallax1.tga", new int[] { 1000, 640 });
-		para2 = glTexImageTGAFile(gl, "parallax2.tga", new int[] { 1000, 640 });
-		para3 = glTexImageTGAFile(gl, "parallax3.tga", new int[] { 1000, 640 });
-		para4 = glTexImageTGAFile(gl, "parallax4.tga", new int[] { 1000, 640 });
-		para5 = glTexImageTGAFile(gl, "parallax5.tga", new int[] { 1000, 640 });
-		para6 = glTexImageTGAFile(gl, "parallax6.tga", new int[] { 1000, 640 });
+		// Load the texture
+
+		ai = new AI();
+		ai.spr = glTexImageTGAFile(gl, "turret.tga", new int[] { 59, 55 });
+
+		ais.add(ai);
+		ais.get(0).x = 600;
+		ais.get(0).y = 550;
+		ais.get(0).w = 50;
+		ais.get(0).h = 50;
+		ais.get(0).active = true;
+
+		spriteidleR[0] = glTexImageTGAFile(gl, "ghostr1.tga", new int[] { 1000, 640 });
+		spriteidleR[1] = glTexImageTGAFile(gl, "ghostr2.tga", new int[] { 1000, 640 });
+
+		spriteidleL[0] = glTexImageTGAFile(gl, "ghostl1.tga", new int[] { 1000, 640 });
+		spriteidleL[1] = glTexImageTGAFile(gl, "ghostl2.tga", new int[] { 1000, 640 });
 		background = glTexImageTGAFile(gl, "starry_night.tga", new int[] { bac.w, bac.w });
+		wall = glTexImageTGAFile(gl, "wall.tga", new int[] { bac.w, bac.w });
 
-		spriteidleR[0] = spriteTex1;
-		spriteidleR[1] = spriteTex2;
-
-		spriteidleL[0] = spriteTexAlt1;
-		spriteidleL[1] = spriteTexAlt2;
-
-		parallaxTex[0] = para1;
-		parallaxTex[1] = para2;
-		parallaxTex[2] = para3;
-		parallaxTex[3] = para4;
-		parallaxTex[4] = para5;
-		parallaxTex[5] = para6;
+		fireR[0] = glTexImageTGAFile(gl, "firer1.tga", new int[] { 30, 10 });
+		fireR[1] = glTexImageTGAFile(gl, "firer2.tga", new int[] { 30, 10 });
+		fireL[0] = glTexImageTGAFile(gl, "firel1.tga", new int[] { 30, 10 });
+		fireL[1] = glTexImageTGAFile(gl, "firel2.tga", new int[] { 30, 10 });
 
 		for (int i = 0; i < tiles.length; i++)
 			for (int j = 0; j < tiles[i].length; j++) {
-				if (i == j)
+				if (i == 1 || i == 41)
 					tiles[i][j] = 1;
 				else
 					tiles[i][j] = 0;
@@ -169,24 +183,39 @@ public class JavaFramework {
 			}
 
 			if (kbState[KeyEvent.VK_LEFT]) {
-				if (bac.x + cam.x < 0 && spr.camx == staticPos0) {
-					para.x += 3;
-					bac.x += 5;
-					spr.x--;
-				} else if (spr.camx > 0) {
-					spr.camx -= 5;
-				}
+				// for (int i = 0; i < tiles.length; i++)
+				// Acting as if we are running a loop for existing walls
+				int i = 1;
+				if (!((double) ((spr.x - 1) / 40) <= i - 1) && tiles[i][0] == 1)
+					// System.out.println(spr.x);
+					if (bac.x + cam.x < 0 && spr.camx == staticPos0) {
+						para.x += 3;
+						bac.x += 5;
+						spr.x -= 5;
+						if (fire.active)
+							fire.camx += 5;
+					} else if (spr.camx > 0) {
+						spr.camx -= 5;
+						spr.x -= 5;
+					}
 				faceRight = false;
 			}
 
 			if (kbState[KeyEvent.VK_RIGHT]) {
-				if (bac.x + cam.x > -1000 && spr.camx == staticPos0) {
-					para.x -= 3;
-					bac.x -= 5;
-					spr.x++;
-				} else if (spr.camx < 590) {
-					spr.camx += 5;
-				}
+				// for (int i = 0; i < tiles.length; i++)
+				// Acting as if we are running a loop for existing walls
+				int i = 41;
+				if (!((double) ((spr.x) / 40) >= i - 2 && tiles[i][0] == 1))
+					if ((bac.x + cam.x > -1000 && spr.camx == staticPos0)) {
+						para.x -= 3;
+						bac.x -= 5;
+						spr.x += 5;
+						if (fire.active)
+							fire.camx -= 5;
+					} else if (spr.camx < 590) {
+						spr.camx += 5;
+						spr.x += 5;
+					}
 				faceRight = true;
 			}
 
@@ -195,13 +224,20 @@ public class JavaFramework {
 					para.y++;
 					cam.y++;
 					spr.camy++;
+					ais.get(0).camy++;
+					if (fire.active)
+						fire.camy++;
 				}
 			}
+
 			if (kbState[KeyEvent.VK_S]) {
 				if (cam.y > 0) {
 					para.y--;
 					cam.y--;
 					spr.camy--;
+					ais.get(0).camy--;
+					if (fire.active)
+						fire.camy--;
 				}
 			}
 			if (kbState[KeyEvent.VK_A]) {
@@ -209,6 +245,9 @@ public class JavaFramework {
 					para.x++;
 					cam.x++;
 					spr.camx++;
+					ais.get(0).camx++;
+					if (fire.active)
+						fire.camx++;
 				}
 			}
 			if (kbState[KeyEvent.VK_D]) {
@@ -216,26 +255,23 @@ public class JavaFramework {
 					para.x--;
 					cam.x--;
 					spr.camx--;
+					ais.get(0).camx--;
+					if (fire.active)
+						fire.camx--;
+				}
+			}
+
+			if (kbState[KeyEvent.VK_SPACE]) {
+				// drawProjectile(spr.x + 50, spr.y + 10, faceRight, time, ais);
+				if (!fire.active) {
+					fire.camx = spr.camx + 20;
+					// fire.x = spr.camx + 20;
+					fire.active = true;
 				}
 			}
 
 			gl.glClearColor(0, 0, 0, 1);
 			gl.glClear(GL2.GL_COLOR_BUFFER_BIT);
-
-			// Parallax Animation update
-
-			if (time == 42)
-				parallexFrame = 0;
-			else if (time == 34)
-				parallexFrame = 1;
-			else if (time == 26)
-				parallexFrame = 2;
-			else if (time == 18)
-				parallexFrame = 3;
-			else if (time == 10)
-				parallexFrame = 4;
-			else if (time == 0)
-				parallexFrame = 5;
 
 			/* Draw sprite */
 
@@ -263,15 +299,37 @@ public class JavaFramework {
 		ymin = (int) Math.floor(0 - (cam.y + bac.y) / bac.w);
 		for (int i = xmin; i < xmin + xinc; i++) {
 			for (int j = ymin; j < ymin + yinc; j++) {
-				glDrawSprite(gl, background, (i * 40) + cam.x + bac.x - 40, (j * 40) + bac.y + cam.y - 40, bac.w,
-						bac.w);
+				if (tiles[i][j] == 0)
+					glDrawSprite(gl, background, (i * 40) + cam.x + bac.x - 40, (j * 40) + bac.y + cam.y - 40, bac.w,
+							bac.w);
+				else
+					glDrawSprite(gl, wall, (i * 40) + cam.x + bac.x - 40, (j * 40) + bac.y + cam.y - 40, bac.w, bac.w);
 			}
 		}
 
-		// Draw Parallax
+		// draw turret here and automatically fire towards left
 
-		if (para.x > -450 && para.x < 450 && para.y > -300 && para.y < 440)
-			glDrawSprite(gl, parallaxTex[parallexFrame], para.x, para.y, 500, 320);
+		ais.get(0).x = ai.camx + bac.x + 600;
+		if (time % 2 == 0) {
+			if (moveright) {
+				if (ai.tempx <= 100) {
+					ais.get(0).x++;
+					ai.tempx++;
+					ai.camx++;
+				} else
+					moveright = false;
+			} else {
+				if (ai.tempx >= 0) {
+					ais.get(0).x--;
+					ai.tempx--;
+					ai.camx--;
+				} else
+					moveright = true;
+			}
+		}
+		if (ais.get(0).active) {
+			glDrawSprite(gl, ais.get(0).spr, ais.get(0).x, ai.camy + bac.y + 550, 50, 50);
+		}
 
 		// Draw player sprite
 
@@ -292,6 +350,34 @@ public class JavaFramework {
 						changedir = 0;
 				}
 				glDrawSprite(gl, spriteidleL[changedir], spr.camx, spr.camy, spriteSize[0], spriteSize[1]);
+			}
+		}
+
+		// Draw projectile
+
+		// TODO fix bugs
+
+		if (!fire.active)
+			fire.right = faceRight;
+		if (fire.active) {
+
+			if (fire.right) {
+				fire.x += 2;
+				glDrawSprite(gl, fireR[0], fire.camx + fire.x, fire.y + fire.camy, 30, 10);
+			} else {
+				fire.x -= 2;
+				glDrawSprite(gl, fireL[0], fire.camx + fire.x - 50, fire.y + fire.camy, 30, 10);
+			}
+			increase++;
+			if ((fire.camx + fire.x < -60 || fire.camx + fire.x > 630)) {
+				fire.active = false;
+				increase = 0;
+				fire.x = 0;
+			} else if ((fire.x + fire.camx + 30 >= ais.get(0).x && fire.right)
+					|| (fire.x + fire.camx - 50 <= ais.get(0).x + ais.get(0).w) && !fire.right) {
+				fire.active = false;
+				fire.x = 0;
+				increase = 0;
 			}
 		}
 	}
@@ -405,4 +491,25 @@ class Sprite {
 	public int camx;
 	public int y;
 	public int camy;
+}
+
+class AI {
+	public int spr;
+	public int x;
+	public int y;
+	public int camx;
+	public int camy;
+	public int w;
+	public int h;
+	public boolean active;
+	public int tempx;
+}
+
+class Projectile {
+	public int x;
+	public int y;
+	public int camx;
+	public int camy;
+	public boolean active;
+	public boolean right;
 }
